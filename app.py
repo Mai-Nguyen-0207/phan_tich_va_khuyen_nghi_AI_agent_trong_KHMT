@@ -8,13 +8,13 @@ st.set_page_config(layout="wide")
 st.title("📊 HỆ THỐNG PHÂN TÍCH & KHUYẾN NGHỊ AI AGENT TRONG KHMT")
 st.caption("Ứng dụng phân tích dữ liệu tác vụ và năng lực tự động hóa thực tế")
 
-# 1. ĐỌC DỮ LIỆU TUYỆT ĐỐI TỪ GOOGLE COLAB
+# 1. ĐỌC DỮ LIỆU CHUẨN TRÊN STREAMLIT CLOUD
 @st.cache_data
 def load_data():
-    df_desires = pd.read_csv('/content/domain_worker_desires.csv') if os.path.exists('/content/domain_worker_desires.csv') else None
-    df_metadata = pd.read_csv('/content/domain_worker_metadata.csv') if os.path.exists('/content/domain_worker_metadata.csv') else None
-    df_tasks = pd.read_csv('/content/task_statement_with_metadata.csv') if os.path.exists('/content/task_statement_with_metadata.csv') else None
-    df_experts = pd.read_csv('/content/expert_rated_technological_capability.csv') if os.path.exists('/content/expert_rated_technological_capability.csv') else None
+    df_desires = pd.read_csv('domain_worker_desires.csv') if os.path.exists('domain_worker_desires.csv') else None
+    df_metadata = pd.read_csv('domain_worker_metadata.csv') if os.path.exists('domain_worker_metadata.csv') else None
+    df_tasks = pd.read_csv('task_statement_with_metadata.csv') if os.path.exists('task_statement_with_metadata.csv') else None
+    df_experts = pd.read_csv('expert_rated_technological_capability.csv') if os.path.exists('expert_rated_technological_capability.csv') else None
     return df_desires, df_metadata, df_tasks, df_experts
 
 df_desires, df_metadata, df_tasks, df_experts = load_data()
