@@ -10,18 +10,18 @@ Original file is located at
 import pandas as pd
 import os
 
-# Define the paths to the CSV files
-files = {
-    "domain_worker_desires.csv": "/content/domain_worker_desires.csv",
-    "domain_worker_metadata.csv": "/content/domain_worker_metadata.csv",
-    "task_statement_with_metadata.csv": "/content/task_statement_with_metadata.csv",
-    "expert_rated_technological_capability.csv": "/content/expert_rated_technological_capability.csv"
-}
+import streamlit as st
 
-# Load each CSV into a DataFrame and display the first 5 rows
-df_desires = pd.read_csv("domain_worker_desires.csv")
-df_metadata = pd.read_csv("domain_worker_metadata.csv")
-df_task_statements = pd.read_csv("task_statement_with_metadata.csv")
+files = {
+    "domain_worker_desires.csv": "domain_worker_desires.csv",
+    "domain_worker_metadata.csv": "domain_worker_metadata.csv",
+    "task_statement_with_metadata.csv": "task_statement_with_metadata.csv",
+    "expert_rated_technological_capability.csv": "expert_rated_technological_capability.csv"
+}
+df_desires = pd.read_csv(files["domain_worker_desires.csv"])
+df_metadata = pd.read_csv(files["domain_worker_metadata.csv"])
+df_task_statements = pd.read_csv(files["task_statement_with_metadata.csv"])
+df_capabilities = pd.read_csv(files["expert_rated_technological_capability.csv"])
 df_capabilities = pd.read_csv("expert_rated_technological_capability.csv")
 st.write("First 5 rows of domain_worker_desires.csv:")
 st.dataframe(df_desires.head())
