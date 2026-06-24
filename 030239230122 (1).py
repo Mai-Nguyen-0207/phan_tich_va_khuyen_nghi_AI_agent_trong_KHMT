@@ -200,8 +200,7 @@ If the Streamlit app isn't loading or the URL is not working, it's often due to 
 
 # Kill any processes running on port 8501 (where Streamlit is usually hosted)
 # Try with lsof first, then pkill for streamlit processes
-!kill $(lsof -t -i:8501) 2>/dev/null || true # Suppress errors if no process found
-!pkill -f streamlit # Kill all processes whose command line contains 'streamlit'
+
 
 print("Killed existing Streamlit processes, if any.")
 
