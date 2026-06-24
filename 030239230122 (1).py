@@ -183,7 +183,7 @@ print("✅ File app.py đã được cấu hình và sẵn sàng!")
 
 """After creating the `app.py` file, we need to install `streamlit` and `localtunnel` to run the application."""
 
-!pip install streamlit plotly
+
 
 """Next, we will install `localtunnel` to expose the Streamlit app to the internet."""
 
