@@ -191,7 +191,7 @@ print("✅ File app.py đã được cấu hình và sẵn sàng!")
 
 """Now, let's run the Streamlit app and expose it using `localtunnel`. The output will include a public URL that you can use to access the application."""
 
-!streamlit run app.py & npx localtunnel --port 8501
+
 
 """### Restart Streamlit and localtunnel
 
@@ -206,7 +206,7 @@ If the Streamlit app isn't loading or the URL is not working, it's often due to 
 print("Killed existing Streamlit processes, if any.")
 
 # Restart Streamlit and localtunnel
-!streamlit run app.py & npx localtunnel --port 8501
+
 
 """After running the cell above, a new public URL should be displayed (e.g., `https://[random-string].loca.lt`). Click on this new link to access your Streamlit application.
 
