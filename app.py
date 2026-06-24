@@ -1,0 +1,138 @@
+
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import os
+
+st.set_page_config(layout="wide")
+st.title("📊 HỆ THỐNG PHÂN TÍCH & KHUYẾN NGHỊ AI AGENT TRONG KHMT")
+st.caption("Ứng dụng phân tích dữ liệu tác vụ và năng lực tự động hóa thực tế")
+
+# 1. ĐỌC DỮ LIỆU TUYỆT ĐỐI TỪ GOOGLE COLAB
+@st.cache_data
+def load_data():
+    df_desires = pd.read_csv('/content/domain_worker_desires.csv') if os.path.exists('/content/domain_worker_desires.csv') else None
+    df_metadata = pd.read_csv('/content/domain_worker_metadata.csv') if os.path.exists('/content/domain_worker_metadata.csv') else None
+    df_tasks = pd.read_csv('/content/task_statement_with_metadata.csv') if os.path.exists('/content/task_statement_with_metadata.csv') else None
+    df_experts = pd.read_csv('/content/expert_rated_technological_capability.csv') if os.path.exists('/content/expert_rated_technological_capability.csv') else None
+    return df_desires, df_metadata, df_tasks, df_experts
+
+df_desires, df_metadata, df_tasks, df_experts = load_data()
+
+# TỰ ĐỘNG ĐỒNG BỘ CỘT NGHỀ NGHIỆP TRÁNH KEYERROR
+standardized_col_name = 'Occupation_Standardized'
+for df_item in [df_desires, df_metadata, df_tasks, df_experts]:
+    if df_item is not None:
+        # Clean column names by stripping whitespace
+        df_item.columns = [str(col).strip() for col in df_item.columns]
+
+        # Get all current column names
+        current_cols_after_strip = df_item.columns.tolist()
+
+        # Identify all columns that are 'occupation-like' (case-insensitive 'occupation')
+        occupation_like_cols = [
+            col for col in current_cols_after_strip
+            if 'occupation' in col.lower()
+        ]
+
+        # If no occupation-like columns, or already perfectly standardized, continue
+        if not occupation_like_cols and standardized_col_name not in current_cols_after_strip:
+            continue
+
+        # Determine the column to be the primary 'Occupation_Standardized'
+        primary_col_candidate = None
+        if standardized_col_name in current_cols_after_strip:
+            primary_col_candidate = standardized_col_name
+        elif occupation_like_cols:
+            primary_col_candidate = occupation_like_cols[0] # Pick the first found if standardized not found
+
+        if primary_col_candidate is None:
+            # No relevant column found to standardize/keep, so skip this DataFrame
+            continue
+
+        # If the primary column is not already 'Occupation_Standardized', rename it
+        if primary_col_candidate != standardized_col_name:
+            df_item.rename(columns={primary_col_candidate: standardized_col_name}, inplace=True)
+            # Update current columns list after rename
+            current_cols_after_strip = df_item.columns.tolist()
+
+        # Now, drop all other occupation-like columns, making sure to exclude the one we just ensured is 'Occupation_Standardized'
+        cols_to_drop = [
+            col for col in current_cols_after_strip
+            if col != standardized_col_name and 'occupation' in col.lower()
+        ]
+        
+        if cols_to_drop:
+            # Use errors='ignore' to prevent KeyError if a column somehow doesn't exist 
+            # (though with this logic, it should always exist if it's in cols_to_drop)
+            df_item.drop(columns=cols_to_drop, inplace=True, errors='ignore')
+
+# 2. XỬ LÝ BỘ LỌC NGÀNH NGHỀ KHOA HỌC MÁY TÍNH / CNTT
+selected_job = "Software Developers"
+if df_tasks is not None and 'Occupation_Standardized' in df_tasks.columns:
+    all_jobs = list(set(df_tasks['Occupation_Standardized'].squeeze().dropna().tolist()))
+    it_jobs = [job for job in all_jobs if any(kw in str(job) for kw in ['Computer', 'Software', 'Web', 'Developer', 'Data', 'Network', 'Programmer'])]
+    if len(it_jobs) == 0:
+        it_jobs = list(all_jobs[:10])
+
+    st.sidebar.header("⚙️ Cấu hình bộ lọc")
+    selected_job = st.sidebar.selectbox("Chọn ngành nghề cần phân tích:", it_jobs)
+
+st.subheader(f"🎯 Kết quả phân tích tác vụ công việc ngành: {selected_job}")
+
+# 3. TRỰC QUAN HÓA BIỂU ĐỒ BẰNG PLOTLY
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("##### 🙋‍♂️ Mong muốn tự động hóa của Nhân sự (Worker Desires)")
+    if df_desires is not None and 'Occupation_Standardized' in df_desires.columns:
+        df_job_desire = df_desires[df_desires['Occupation_Standardized'] == selected_job]
+        if not df_job_desire.empty and 'Automation Desire Rating' in df_job_desire.columns:
+            fig1 = px.histogram(df_job_desire, x='Automation Desire Rating',
+                                title="Mức độ mong muốn phân bổ theo số lượng tác vụ",
+                                color_discrete_sequence=['#ff4b4b'])
+            st.plotly_chart(fig1, use_container_width=True)
+        else:
+            st.info("Ngành này chưa có dữ liệu điểm khảo sát từ nhân viên.")
+    else:
+        st.error("Lỗi: Thiếu file domain_worker_desires.csv")
+
+with col2:
+    st.markdown("##### 🧠 Khả năng tự động hóa thực tế (Expert Capacity Rating)")
+    if df_experts is not None and 'Occupation_Standardized' in df_experts.columns:
+        df_job_expert = df_experts[df_experts['Occupation_Standardized'] == selected_job]
+        if not df_job_expert.empty and 'Automation Capacity Rating' in df_job_expert.columns:
+            fig2 = px.box(df_job_expert, y='Automation Capacity Rating',
+                          title="Đánh giá từ chuyên gia về năng lực thực thi của AI",
+                          color_discrete_sequence=['#1f77b4'])
+            st.plotly_chart(fig2, use_container_width=True)
+        else:
+            st.info("Ngành này chưa có dữ liệu điểm đánh giá từ chuyên gia.")
+    else:
+        st.error("Lỗi: Thiếu file expert_rated_technological_capability.csv")
+
+# 4. BÁO CÁO PHÂN TÍCH & KHUYẾN NGHỊ ỨNG DỤNG AI AGENT TRONG KHMT
+st.markdown("---")
+st.subheader("💡 Khuyến nghị Chiến lược triển khai AI Agent")
+
+st.markdown(f"""
+Dựa trên việc đối chiếu chéo dữ liệu thực tế cho vị trí **{selected_job}**, hệ thống đưa ra mô hình khuyến nghị như sau:
+
+#### 📈 1. Phân tích khoảng cách (Gap Analysis)
+* **Điểm chạm tối ưu:** Các tác vụ có điểm mong muốn tự động hóa từ nhân viên cao (*Desire Rating*) và khả năng công nghệ được chuyên gia đánh giá khả thi (*Capacity Rating > 4.0*) chính là vị trí lý tưởng để ứng dụng **AI Agent**. Nhóm việc này thường bao gồm: Viết tài liệu kiểm thử, rà soát log bảo mật, hoặc xử lý định dạng metadata thô.
+* **Tối ưu kinh tế:** Dựa trên bảng lương ngành Khoa học máy tính (*Mean Annual Wage*), chi phí nhân công rất cao. Việc giải phóng kỹ sư khỏi tác vụ lặp đi lặp lại sẽ nâng cao hiệu suất làm việc tổng thể.
+
+#### 🚀 2. Đề xuất Kiến trúc AI Agent phù hợp
+* **Mô hình Single-Agent + RAG (Đại lý đơn nhiệm):**
+    * *Ứng dụng:* Tự động hóa việc tra cứu tài liệu kỹ thuật, quản lý phân loại cấu trúc thông tin (dựa vào file `domain_worker_metadata.csv`).
+    * *Đặc điểm:* Sử dụng một Agent kết hợp với bộ nhớ ngoài (Vector Database) để xử lý thông tin chính xác, nhanh chóng.
+* **Hệ thống Multi-Agent (Hệ thống đa đại lý):**
+    * *Ứng dụng:* Tự động hóa các chuỗi tác vụ phức tạp trong chu trình DevOps, CI/CD hoặc phát triển phần mềm dựa trên các mô tả yêu cầu kỹ thuật (*Task Statement*).
+    * *Đặc điểm:* Triển khai một nhóm gồm nhiều Agent chuyên trách (Agent viết code, Agent rà soát lỗi bảo mật, Agent kiểm thử tự động) tương tác với nhau, có sự giám sát và phê duyệt chất lượng (*Quality Oversight*) từ kỹ sư con người nhằm đạt hiệu quả tối đa.
+""")
+
+# 5. PHỤ LỤC XEM TRƯỚC DỮ LIỆU GỐC
+st.markdown("---")
+st.subheader("📋 Phụ lục: Danh sách tác vụ thô từ hệ thống")
+if df_tasks is not None:
+    st.dataframe(df_tasks[df_tasks['Occupation_Standardized'] == selected_job].head(10), use_container_width=True)
