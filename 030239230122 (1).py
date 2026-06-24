@@ -19,11 +19,10 @@ files = {
 }
 
 # Load each CSV into a DataFrame and display the first 5 rows
-df_desires = pd.read_csv(files["domain_worker_desires.csv"])
-df_metadata = pd.read_csv(files["domain_worker_metadata.csv"])
-df_task_statements = pd.read_csv(files["task_statement_with_metadata.csv"])
-df_capabilities = pd.read_csv(files["expert_rated_technological_capability.csv"])
-
+df_desires = pd.read_csv("domain_worker_desires.csv")
+df_metadata = pd.read_csv("domain_worker_metadata.csv")
+df_task_statements = pd.read_csv("task_statement_with_metadata.csv")
+df_capabilities = pd.read_csv("expert_rated_technological_capability.csv")
 print("First 5 rows of domain_worker_desires.csv:")
 display(df_desires.head())
 
