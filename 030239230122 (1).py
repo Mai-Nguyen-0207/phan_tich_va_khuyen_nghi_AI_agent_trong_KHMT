@@ -23,17 +23,7 @@ df_metadata = pd.read_csv(files["domain_worker_metadata.csv"])
 df_task_statements = pd.read_csv(files["task_statement_with_metadata.csv"])
 df_capabilities = pd.read_csv(files["expert_rated_technological_capability.csv"])
 df_capabilities = pd.read_csv("expert_rated_technological_capability.csv")
-st.write("First 5 rows of domain_worker_desires.csv:")
-st.dataframe(df_desires.head())
 
-st.write("First 5 rows of domain_worker_metadata.csv:")
-st.dataframe(df_metadata.head())
-
-st.write("First 5 rows of task_statement_with_metadata.csv:")
-st.dataframe(df_task_statements.head())
-
-st.write("First 5 rows of expert_rated_technological_capability.csv:")
-st.dataframe(df_capabilities.head())
 
 """After executing the cell above, you will have the data loaded into pandas DataFrames. Now, I will create the `app.py` file for the Streamlit application."""
 
