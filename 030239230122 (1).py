@@ -187,7 +187,7 @@ print("✅ File app.py đã được cấu hình và sẵn sàng!")
 
 """Next, we will install `localtunnel` to expose the Streamlit app to the internet."""
 
-!npm install localtunnel
+
 
 """Now, let's run the Streamlit app and expose it using `localtunnel`. The output will include a public URL that you can use to access the application."""
 
